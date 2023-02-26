@@ -1,7 +1,8 @@
 #!/usr/bin/env bb
 (require
  '[babashka.tasks :as tasks :refer [shell]]
- '[clojure.string :as string])
+ '[clojure.string :as string]
+ '[clojure.tools.cli :refer [parse-opts]])
 
 (defn remove-trailing-linebreak
   "Returns the given string without a trailing \n is there was one."
@@ -28,14 +29,38 @@
                    "main"]))
       (shell "tee /etc/apt/sources.list.d/adoptium.list")))
 
-(defn install! []
-  (println "🚚 Installing Java Temurin")
+(defn install! [version]
+  (println (str "🚚 Installing Java Temurin v" version))
   (shell "apt update")
-  (shell "apt install --yes temurin-17-jdk"))
+  (shell (str "apt install --yes temurin-" version "-jdk")))
 
-(defn done! []
-  (println "✅ Java Temurin has been installed"))
+(defn done! [version]
+  (println (str "✅ Java Temurin v" version " has been installed")))
 
-(setup!)
-(install!)
-(done!)
+(def java-version-missing "The Java Version must be specified (-v, --version), and be either: 8, 11, 16+")
+
+(defn validate-options
+  [{:keys [options errors] :as opts}]
+  (println opts)
+  (let [errors (set errors)]
+    (cond-> (into options {:abort?    false
+                           :abort-msg "internal error"})
+      (errors java-version-missing)
+      (assoc :abort? true :abort-msg java-version-missing))))
+
+(def cli-options
+  [["-v" "--version VERSION" "Java Version"
+    :missing  java-version-missing
+    :parse-fn #(Integer/parseInt %)
+    :validate [#(or (#{8 11} %) (<= 16 %))]]])
+
+(let [{:keys [abort? abort-msg
+              version]} (-> (parse-opts *command-line-args* cli-options)
+                            (validate-options))]
+  (if-not abort?
+    (do (setup!)
+        (install! version)
+        (done! version)
+        (System/exit 0))
+    (do (println abort-msg)
+        (System/exit 1))))
