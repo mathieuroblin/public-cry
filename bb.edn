@@ -1,0 +1,9 @@
+{:tasks {create-cluster
+         {:doc "Creates a kind cluster to provide a dev environment with hot reload capabilities to test scripts and images"
+          :task (shell "kind create cluster --config kind.yml")}
+         watch
+         {:doc "Start the babashka image with hot reload capabilities"
+          :task (shell "skaffold dev --port-forward")}
+         delete-cluster
+         {:doc "Delete the development cluster"
+          :task (shell "kind delete cluster --name public-cry")}}}
