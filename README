@@ -1,0 +1,9 @@
+# How to
+## Create a cluster
+`kind create cluster --config kind.yml`
+
+## Start Skaffold
+`skaffold dev --trigger='manual' --port-forward`
+
+## Delete the cluster
+`kind delete cluster --name babashka`

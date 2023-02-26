@@ -1,0 +1,23 @@
+apiVersion: skaffold/v4beta1
+kind: Config
+metadata:
+  name: public-cry-skaffold
+manifests:
+  rawYaml:
+    - images/foundation/deployment.yml
+build:
+  artifacts:
+    - image: mathieuroblin.public-cry.babashka
+      context: .
+      docker:
+        dockerfile: images/foundation/Dockerfile
+      sync:
+        infer:
+          - scripts/*
+# Skaffold automatically forwards Kubernetes Services in dev mode if you run it with --port-forward. 
+# If your project contains resources other than services, you can set-up port-forwarding to port-forward these resources in dev or debug mode.
+# portForward:
+#   - resourceType: deployment
+#     resourceName: runeleven-onerepl-deployment
+#     port: nrepl
+#     localPort: 9000

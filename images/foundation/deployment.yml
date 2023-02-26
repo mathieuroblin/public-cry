@@ -1,0 +1,40 @@
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: onze-service
+# spec:
+#   selector:
+#     application: onze
+#   ports:
+#   - name: tnt
+#     protocol: TCP
+#     port: 8080
+#     targetPort: tnt-webserver
+
+# ---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deployment-babashka
+spec:
+  selector:
+    matchLabels:
+      application: babashka-dev
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        application: babashka-dev
+    spec:
+      containers:
+      - name: babashka-dev
+        image: mathieuroblin.public-cry.babashka
+        # ports:
+        # - containerPort: 8080
+        #   protocol: TCP
+        #   name: tnt-port
+        resources:
+          limits:
+            cpu: "2"
+            memory: 4G
